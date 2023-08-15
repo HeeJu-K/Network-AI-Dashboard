@@ -1,1 +1,6 @@
-UNSW_dataset/*
+data/UNSW_dataset/*
+data/facts/*
+
+.env
+
+__pycache__/

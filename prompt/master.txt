@@ -1,0 +1,6 @@
+ConversationHistory: {history}
+---
+MemoryContext: {context}
+---
+Human: {question}
+Bot:
