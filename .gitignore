@@ -1,6 +1,9 @@
-data/UNSW_dataset/*
+data/UNSW_dataset/*.pcap
 data/facts/*
+data/gz
+data/data_holder
 
 .env
 
+*.DS_Store
 __pycache__/

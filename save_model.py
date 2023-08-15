@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def train_and_save():
-    trainingData = list(Path("data/facts/").glob("**/*.*"))
+    trainingData = list(Path("data/facts/").glob("**/*.pcap"))
 
     if len(trainingData) < 1:
         print("The folder training/facts should be populated with at least one .txt or .md file.", file=sys.stderr)
