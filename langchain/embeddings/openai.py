@@ -15,6 +15,8 @@ from typing import (
     Union,
 )
 
+import time
+
 import numpy as np
 from tenacity import (
     AsyncRetrying,
@@ -35,10 +37,12 @@ logger = logging.getLogger(__name__)
 def _create_retry_decorator(embeddings: OpenAIEmbeddings) -> Callable[[Any], Any]:
     import openai
 
-    min_seconds = 4
-    max_seconds = 10
+    min_seconds = 60
+    max_seconds = 120
     # Wait 2^x * 1 second between each retry starting with
     # 4 seconds, then up to 10 seconds, then 10 seconds afterwards
+
+    print("entering retry decorator")
     return retry(
         reraise=True,
         stop=stop_after_attempt(embeddings.max_retries),
@@ -57,10 +61,12 @@ def _create_retry_decorator(embeddings: OpenAIEmbeddings) -> Callable[[Any], Any
 def _async_retry_decorator(embeddings: OpenAIEmbeddings) -> Any:
     import openai
 
-    min_seconds = 60
-    max_seconds = 120
+    min_seconds = 2
+    max_seconds = 4
     # Wait 2^x * 1 second between each retry starting with
     # 4 seconds, then up to 10 seconds, then 10 seconds afterwards
+    print("entering async retry decorator")
+
     async_retrying = AsyncRetrying(
         reraise=True,
         stop=stop_after_attempt(embeddings.max_retries),
@@ -333,7 +339,10 @@ class OpenAIEmbeddings(BaseModel, Embeddings):
             logger.warning("Warning: model not found. Using cl100k_base encoding.")
             model = "cl100k_base"
             encoding = tiktoken.get_encoding(model)
-        for i, text in enumerate(texts):
+        
+        from tqdm import tqdm
+        for i, text in tqdm(enumerate(texts), total=len(texts), desc="Processing"):
+            time.sleep(0.1) # to avoid rate limit
             if self.model.endswith("001"):
                 # See: https://github.com/openai/openai-python/issues/418#issuecomment-1525939500
                 # replace newlines, which can negatively affect performance.
@@ -343,9 +352,11 @@ class OpenAIEmbeddings(BaseModel, Embeddings):
                 allowed_special=self.allowed_special,
                 disallowed_special=self.disallowed_special,
             )
+
             for j in range(0, len(token), self.embedding_ctx_length):
                 tokens.append(token[j : j + self.embedding_ctx_length])
                 indices.append(i)
+
 
         batched_embeddings: List[List[float]] = []
         _chunk_size = chunk_size or self.chunk_size

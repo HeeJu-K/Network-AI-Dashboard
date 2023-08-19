@@ -31,7 +31,7 @@ def train():
             print(f"Add {f.name} to dataset")
             data.append(f.read())
 
-    textSplitter = CharacterTextSplitter(chunk_size=5000, separator="\n")
+    textSplitter = CharacterTextSplitter(chunk_size=3000, separator="\n")
 
     docs = []
     for sets in data:
